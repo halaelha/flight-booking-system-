@@ -67,3 +67,14 @@ class BookingService:
         flight.available_seats += 1
         self.repository.save(booking)
 
+    def get_passenger_bookings(
+        self, passenger_name: str
+    ) -> list[Booking]:
+
+        if not passenger_name.strip():
+            raise ValueError("Passenger name is required")
+
+        return self.repository.find_by_passenger(
+            passenger_name.strip()
+        )
+

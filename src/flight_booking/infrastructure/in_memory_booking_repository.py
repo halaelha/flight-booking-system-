@@ -13,3 +13,15 @@ class InMemoryBookingRepository(BookingRepository):
 
     def find_by_id(self, booking_id: str) -> Booking | None:
         return self.bookings.get(booking_id)
+
+    def find_by_passenger(
+        self, passenger_name: str
+    ) -> list[Booking]:
+
+        return [
+            booking
+            for booking in self.bookings.values()
+            if booking.passenger_name.casefold()
+            == passenger_name.casefold()
+        ]
+

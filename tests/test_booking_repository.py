@@ -29,3 +29,21 @@ def test_booking_not_found():
     result = repository.find_by_id("INVALID")
 
     assert result is None
+
+def test_find_bookings_by_passenger():
+    repository = InMemoryBookingRepository()
+
+    booking = Booking(
+        booking_id="B002",
+        passenger_name="Sara",
+        flight_number="TK101",
+        ticket_class="Economy",
+        total_price=200.0,
+    )
+
+    repository.save(booking)
+
+    results = repository.find_by_passenger("sara")
+
+    assert len(results) == 1
+    assert results[0].booking_id == "B002"
