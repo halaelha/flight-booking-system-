@@ -1,15 +1,16 @@
 
-
 from uuid import uuid4
 
 from flight_booking.domain.booking import Booking
 from flight_booking.domain.flight import Flight
 from flight_booking.domain.pricing_strategy import PricingStrategy
+from flight_booking.domain.booking_repository import BookingRepository
 
 
 class BookingService:
-    def __init__(self):
-        self.bookings: list[Booking] = []
+
+    def __init__(self, repository: BookingRepository):
+        self.repository = repository
 
     def create_booking(
         self,
@@ -41,7 +42,7 @@ class BookingService:
         )
 
         flight.available_seats -= 1
-        self.bookings.append(booking)
+        self.repository.save(booking)
 
         return booking
 
@@ -51,17 +52,18 @@ class BookingService:
         flight: Flight,
     ) -> None:
 
-        for booking in self.bookings:
-            if booking.booking_id == booking_id:
+        booking = self.repository.find_by_id(booking_id)
 
-                if booking.status == "CANCELLED":
-                    raise ValueError("Booking already cancelled")
+        if booking is None:
+            raise ValueError("Booking not found")
 
-                if booking.flight_number != flight.flight_number:
-                    raise ValueError("Flight does not match booking")
+        if booking.status == "CANCELLED":
+            raise ValueError("Booking already cancelled")
 
-                booking.status = "CANCELLED"
-                flight.available_seats += 1
-                return
+        if booking.flight_number != flight.flight_number:
+            raise ValueError("Flight does not match booking")
 
-        raise ValueError("Booking not found")
+        booking.status = "CANCELLED"
+        flight.available_seats += 1
+        self.repository.save(booking)
+
